@@ -76,7 +76,7 @@ Button(root, image=ButtonPause, bg="#0f1a2b", bd=0, command=mixer.music.pause).p
 
 # Label
 Menu = PhotoImage(file="background.png")
-Label(root, image=Menu, bg="#0f1a2b").pack(padx=10, pady=50, side=RIGHT)
+Label(root, image=Menu, bg="#0f1a2b").pack(padx=10, pady=50, side=LEFT)
 Frame_Music = Frame(root, bd=2, relief=RIDGE)
 Frame_Music.place(x=330, y=350, width=560, height=250)
 Button(
@@ -89,6 +89,7 @@ Button(
     bg="#21b3de",
     command=AddMusic,
 ).place(x=330, y=300)
+
 Scroll = Scrollbar(Frame_Music)
 Playlist = Listbox(
     Frame_Music,
