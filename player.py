@@ -6,7 +6,7 @@ from tkinter import *
 from tkinter import Tk
 from tkinter import filedialog
 import pygame
-from pygame import mixer
+#from pygame import mixer
 
 #playlist="F:\"
 
@@ -16,10 +16,12 @@ root.title("Music Player")
 root.geometry("920x600+290+85")
 root.configure(background="#212121")
 root.resizable(False, False)
+root.bind("<Right>", lambda event: ForwardTrack())
+root.bind("<Left>", lambda event: ReverseTrack())
 
 
-
-mixer.init()
+pygame.mixer.pre_init(44100, -16, 2, 2048)
+pygame.mixer.init()
 
 
 # Create a function to open a file
@@ -39,26 +41,9 @@ def AddMusic():
 def PlayMusic():
     Music_Name = Playlist.get(ACTIVE)
     print(Music_Name[0:-4])
-    mixer.music.load(Playlist.get(ACTIVE))
-    mixer.music.play()
+    pygame.mixer.music.load(Playlist.get(ACTIVE))
+    pygame.mixer.music.play()
 
-## Shuffle is good but makes windows busy.
-# def ShuffleMusic():
-#     global songs
-#     for song in songs:
-
-#         Music_Shuffle = random.choice(songs)
-#         if song == "System Volume Information":
-#             continue
-#         if song == "FOUND.000":
-#             continue
-#         print(Music_Shuffle[0:-4])
-#         mixer.music.load(Music_Shuffle)
-#         mixer.music.play()
-#         while mixer.music.get_busy():
-#             pass
-
-# Shuffle from ChatGPT
 # def ShuffleMusic():
 #     global songs
 #     for song in songs:
@@ -68,9 +53,23 @@ def PlayMusic():
 #         if song == "FOUND.000":
 #             continue
 #         print(Music_Shuffle[0:-4])
-#         mixer.music.load(Music_Shuffle)
-#         mixer.music.play()
-#         while mixer.music.get_busy():
+#         pygame.mixer.music.load(Music_Shuffle)
+#         pygame.mixer.music.play()
+#         pygame.mixer.music.set_endevent(pygame.USEREVENT)  # Register end event
+#         pygame.event.wait()  # Wait for the end event
+
+# def ShuffleMusic():
+#     global songs
+#     for song in songs:
+#         Music_Shuffle = random.choice(songs)
+#         if song == "System Volume Information":
+#             continue
+#         if song == "FOUND.000":
+#             continue
+#         print(Music_Shuffle[0:-4])
+#         pygame.mixer.music.load(Music_Shuffle)
+#         pygame.mixer.music.play()
+#         while pygame.mixer.music.get_busy():
 #             time.sleep(1)  # Add a short delay between each check
 
 def ShuffleMusic():
@@ -82,10 +81,37 @@ def ShuffleMusic():
         if song == "FOUND.000":
             continue
         print(Music_Shuffle[0:-4])
-        mixer.music.load(Music_Shuffle)
-        mixer.music.play()
-        mixer.music.set_endevent(pygame.USEREVENT)  # Register end event
-        pygame.event.wait()  # Wait for the end event
+        pygame.mixer.music.load(Music_Shuffle)
+        pygame.mixer.music.play()
+        end_event = pygame.USEREVENT + 1
+        pygame.mixer.music.set_endevent(end_event)
+        event_triggered = False
+        while not event_triggered:
+            for event in pygame.event.get():
+                if event.type == end_event:
+                    event_triggered = True
+                    break
+            time.sleep(0.1)
+
+
+
+def ForwardTrack():
+    current_index = Playlist.curselection()
+    if current_index:
+        next_index = current_index[0] + 1
+        if next_index < Playlist.size():
+            Playlist.selection_clear(0, END)
+            Playlist.selection_set(next_index)
+            PlayMusic()
+
+def ReverseTrack():
+    current_index = Playlist.curselection()
+    if current_index:
+        prev_index = current_index[0] - 1
+        if prev_index >= 0:
+            Playlist.selection_clear(0, END)
+            Playlist.selection_set(prev_index)
+            PlayMusic()
 
 
 # icon
@@ -105,15 +131,15 @@ Button(root, image=ButtonPlay, bg="#0f1a2b", bd=0, command=PlayMusic).place(
     x=100, y=400
 )
 ButtonStop = PhotoImage(file="stop.png")
-Button(root, image=ButtonStop, bg="#0f1a2b", bd=0, command=mixer.music.stop).place(
+Button(root, image=ButtonStop, bg="#0f1a2b", bd=0, command=pygame.mixer.music.stop).place(
     x=30, y=500
 )
 ButtonResume = PhotoImage(file="resume.png")
-Button(root, image=ButtonResume, bg="#0f1a2b", bd=0, command=mixer.music.unpause).place(
+Button(root, image=ButtonResume, bg="#0f1a2b", bd=0, command=pygame.mixer.music.unpause).place(
     x=115, y=500
 )
 ButtonPause = PhotoImage(file="pause.png")
-Button(root, image=ButtonPause, bg="#0f1a2b", bd=0, command=mixer.music.pause).place(
+Button(root, image=ButtonPause, bg="#0f1a2b", bd=0, command=pygame.mixer.music.pause).place(
     x=200, y=500
 )
 
@@ -121,6 +147,18 @@ ButtonShuffle = PhotoImage(file="shuffle.png")
 Button(root, image=ButtonShuffle, bg="#0f1a2b", bd=0, command=ShuffleMusic).place(
     x=200, y=400
 )
+
+
+#Stash for now.
+# ButtonForward = PhotoImage(file="forward.png")
+# Button(root, image=ButtonForward, bg="#0f1a2b", bd=0, command=ForwardTrack).place(
+#     x=285, y=500
+# )
+
+# ButtonReverse = PhotoImage(file="reverse.png")
+# Button(root, image=ButtonReverse, bg="#0f1a2b", bd=0, command=ReverseTrack).place(
+#     x=40, y=500
+# )
 
 
 # Label Choose mp3
