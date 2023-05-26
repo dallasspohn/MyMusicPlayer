@@ -1,10 +1,14 @@
 # importing libraries
 import os
+import random
+import time
 from tkinter import *
 from tkinter import Tk
 from tkinter import filedialog
+import pygame
 from pygame import mixer
 
+#playlist="F:\"
 
 # Create a GUI window
 root = Tk()
@@ -12,11 +16,15 @@ root.title("Music Player")
 root.geometry("920x600+290+85")
 root.configure(background="#212121")
 root.resizable(False, False)
+
+
+
 mixer.init()
 
 
 # Create a function to open a file
 def AddMusic():
+    global songs
     path = filedialog.askdirectory()
     if path:
         os.chdir(path)
@@ -24,18 +32,8 @@ def AddMusic():
         for song in songs:
             if song.endswith(".mp3"):
                 Playlist.insert(END, song)
-
-#archived
-# # Create a function to open a file
-# def AddMusic():
-#     path = filedialog.askdirectory()
-#     if path:
-#         os.chdir(path)
-#         songs = os.listdir(path)
-#         for song in songs:
-#             if song.endswith(".mp3"):
-#                 Playlist.insert(END, song)
-
+#        print(songs)
+        return songs
 
 
 def PlayMusic():
@@ -43,6 +41,51 @@ def PlayMusic():
     print(Music_Name[0:-4])
     mixer.music.load(Playlist.get(ACTIVE))
     mixer.music.play()
+
+## Shuffle is good but makes windows busy.
+# def ShuffleMusic():
+#     global songs
+#     for song in songs:
+
+#         Music_Shuffle = random.choice(songs)
+#         if song == "System Volume Information":
+#             continue
+#         if song == "FOUND.000":
+#             continue
+#         print(Music_Shuffle[0:-4])
+#         mixer.music.load(Music_Shuffle)
+#         mixer.music.play()
+#         while mixer.music.get_busy():
+#             pass
+
+# Shuffle from ChatGPT
+# def ShuffleMusic():
+#     global songs
+#     for song in songs:
+#         Music_Shuffle = random.choice(songs)
+#         if song == "System Volume Information":
+#             continue
+#         if song == "FOUND.000":
+#             continue
+#         print(Music_Shuffle[0:-4])
+#         mixer.music.load(Music_Shuffle)
+#         mixer.music.play()
+#         while mixer.music.get_busy():
+#             time.sleep(1)  # Add a short delay between each check
+
+def ShuffleMusic():
+    global songs
+    for song in songs:
+        Music_Shuffle = random.choice(songs)
+        if song == "System Volume Information":
+            continue
+        if song == "FOUND.000":
+            continue
+        print(Music_Shuffle[0:-4])
+        mixer.music.load(Music_Shuffle)
+        mixer.music.play()
+        mixer.music.set_endevent(pygame.USEREVENT)  # Register end event
+        pygame.event.wait()  # Wait for the end event
 
 
 # icon
@@ -74,7 +117,13 @@ Button(root, image=ButtonPause, bg="#0f1a2b", bd=0, command=mixer.music.pause).p
     x=200, y=500
 )
 
-# Label
+ButtonShuffle = PhotoImage(file="shuffle.png")
+Button(root, image=ButtonShuffle, bg="#0f1a2b", bd=0, command=ShuffleMusic).place(
+    x=200, y=400
+)
+
+
+# Label Choose mp3
 Menu = PhotoImage(file="background.png")
 Label(root, image=Menu, bg="#0f1a2b").pack(padx=10, pady=50, side=LEFT)
 Frame_Music = Frame(root, bd=2, relief=RIDGE)
